@@ -1,0 +1,39 @@
+#!/bin/sh
+
+echo "🔍 Vérification du code..."
+
+# Vérifier si des fichiers sont stagés
+if git diff --cached --quiet; then
+    echo "❌ Aucun fichier n'est stagé pour le commit"
+    exit 1
+fi
+
+# Sauvegarder les fichiers modifiés non stagés
+git stash -q --keep-index
+
+# Vérifier le linting
+echo "🧹 Vérification du linting..."
+npm run lint
+LINT_RESULT=$?
+
+# Vérifier les types TypeScript
+echo "📝 Vérification des types TypeScript..."
+npm run type-check
+TS_RESULT=$?
+
+# Restaurer les fichiers modifiés non stagés
+git stash pop -q
+
+# Vérifier les résultats
+if [ $LINT_RESULT -ne 0 ]; then
+    echo "❌ Le linting a échoué"
+    exit 1
+fi
+
+if [ $TS_RESULT -ne 0 ]; then
+    echo "❌ La vérification des types a échoué"
+    exit 1
+fi
+
+echo "✅ Vérifications réussies !"
+exit 0
