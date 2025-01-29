@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Vérification des tests avant le push
+echo "🧪 Exécution des tests..."
+
+# Tests Vue (si disponibles)
+if [ -f "package.json" ]; then
+    if grep -q "\"test\"" package.json; then
+        npm test
+        if [ $? -ne 0 ]; then
+            echo "❌ Les tests ont échoué"
+            exit 1
+        fi
+        echo "✅ Tests : OK"
+    fi
+fi
+
+# Vérification des branches protégées
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+protected_branches="^(main|master|develop)$"
+
+if [[ "$current_branch" =~ $protected_branches ]]; then
+    echo "❌ Push direct sur la branche $current_branch non autorisé"
+    echo "📝 Créez une branche feature/* et une Pull Request"
+    exit 1
+fi
+
+echo "✅ Pre-push hooks passés avec succès !"
+exit 0

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Lire le message de commit
+commit_msg=$(cat "$1")
+
+# Format attendu: <type>[scope optional]: <description>
+# Types autorisés: feat, fix, docs, style, refactor, perf, test, chore, ci
+commit_pattern="^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\([a-z]+\))?: .+"
+
+if ! echo "$commit_msg" | grep -qE "$commit_pattern"; then
+    echo "❌ Le message de commit ne suit pas le format conventional commits."
+    echo "Format attendu: <type>[scope optional]: <description>"
+    echo "Types autorisés: feat, fix, docs, style, refactor, perf, test, chore, ci"
+    echo "Exemple: feat(auth): add login functionality"
+    exit 1
+fi
+
+echo "✅ Format du message de commit validé"
+exit 0
